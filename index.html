@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Дія</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{--card:rgba(255,255,255,0.84);--r:18px;--nav:72px;}
+body{font-family:'Helvetica Neue',Arial,sans-serif;overflow:hidden;user-select:none;background:#1a1a2e;}
+
+.shell{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
+.phone{width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;
+  box-shadow:0 40px 120px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.15);}
+
+@keyframes bgShift{
+  0%{background-position:0% 50%}
+  8%{background-position:75% 15%}
+  16%{background-position:100% 68%}
+  24%{background-position:55% 100%}
+  32%{background-position:8% 35%}
+  40%{background-position:88% 78%}
+  48%{background-position:35% 8%}
+  56%{background-position:72% 55%}
+  64%{background-position:18% 92%}
+  72%{background-position:92% 42%}
+  80%{background-position:45% 20%}
+  88%{background-position:10% 70%}
+  100%{background-position:0% 50%}
+}
+.grad-bg{position:absolute;inset:0;z-index:0;
+  background:linear-gradient(135deg,#a8d8b0,#b8c8e8,#c4a8d8,#e8a8b8,#e8c4a0,#b8e8c0,#a8c8e8,#d0a8e0);
+  background-size:500% 500%;animation:bgShift 18s ease infinite;}
+
+.scr{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;z-index:1;}
+.scr.active{display:flex;animation:fadeIn .22s ease;}
+@keyframes fadeIn{from{opacity:.6;transform:translateY(4px)}to{opacity:1;transform:none}}
+.sb-body{flex:1;overflow-y:auto;overflow-x:hidden;padding-top:16px;
+  padding-bottom:calc(var(--nav)+10px);scrollbar-width:none;}
+.sb-body::-webkit-scrollbar{display:none;}
+
+.bnav{position:absolute;bottom:0;left:0;right:0;height:var(--nav);
+  background:#111;display:flex;border-radius:0 0 48px 48px;z-index:200;padding-bottom:8px;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;cursor:pointer;color:rgba(255,255,255,.35);font-size:11px;
+  transition:color .2s;position:relative;padding-top:4px;}
+.ni.on{color:#fff;}
+.ni.on::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:28px;height:3px;background:#fff;border-radius:0 0 3px 3px;}
+.ni svg{width:22px;height:22px;fill:currentColor;}
+.ni.stroke svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.ndot{width:8px;height:8px;background:#f33;border-radius:50%;}
+.nwrap{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.nwrap .ndot{position:absolute;top:-2px;right:-5px;}
+.bolt-badge{position:absolute;top:-3px;right:-7px;width:16px;height:16px;border-radius:50%;
+  background:#fff;display:flex;align-items:center;justify-content:center;border:1.5px solid #333;}
+
+/* ══ PIN ══ */
+#s-pin{align-items:center;justify-content:center;}
+.pin-ttl{font-size:22px;font-weight:500;margin-bottom:36px;color:#111;}
+.pin-dots{display:flex;gap:14px;margin-bottom:46px;}
+.pdot{width:12px;height:12px;border-radius:50%;background:rgba(0,0,0,.15);transition:background .15s;}
+.pdot.on{background:#111;}
+.pgrid{display:grid;grid-template-columns:repeat(3,80px);gap:15px;margin-bottom:22px;}
+.pb{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.72);border:none;
+  cursor:pointer;font-size:28px;color:#111;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);box-shadow:0 2px 10px rgba(0,0,0,.08);transition:transform .1s,background .1s;}
+.pb:active{transform:scale(.93);background:rgba(255,255,255,.95);}
+.pb.fp,.pb.del{background:transparent;box-shadow:none;}
+.pb.del{font-size:22px;}
+.pfgt{font-size:14px;color:#111;opacity:.65;margin-top:18px;cursor:pointer;}
+
+/* ══ HOME ══ */
+.greet{font-size:32px;font-weight:700;padding:12px 18px 8px;}
+.slabel{font-size:16px;font-weight:600;margin:14px 0 8px;color:#111;}
+.ncard{background:var(--card);border-radius:var(--r);padding:16px 18px;
+  margin:0 18px 12px;backdrop-filter:blur(10px);box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.ncard-lbl{font-size:13px;color:#666;margin-bottom:5px;}
+.ncard-txt{font-size:15px;font-weight:500;line-height:1.4;}
+.nzcard{background:var(--card);border-radius:var(--r);padding:18px;
+  margin:0 18px 14px;backdrop-filter:blur(10px);box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.nztitle{font-size:22px;font-weight:700;margin-bottom:7px;}
+.nzdesc{font-size:14px;color:#444;line-height:1.5;margin-bottom:11px;}
+.nzrow{display:flex;gap:8px;align-items:center;}
+.nzi{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.nzi-b{background:#005bbb;color:#fff;}.nzi-y{background:#ffd500;color:#333;}.nzi-g{background:#2e7d32;color:#fff;}
+.arrbtn{margin-left:auto;width:32px;height:32px;border-radius:50%;background:#111;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;}
+.qas{display:flex;gap:12px;padding:0 18px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;}
+.qas::-webkit-scrollbar{display:none;}
+.qa{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:70px;cursor:pointer;}
+.qai{width:56px;height:56px;border-radius:14px;background:#111;display:flex;align-items:center;justify-content:center;}
+.qal{font-size:12px;text-align:center;line-height:1.3;color:#111;}
+.banner{margin:0 18px 18px;border-radius:var(--r);overflow:hidden;background:#111;min-height:110px;
+  display:flex;flex-direction:column;justify-content:flex-end;padding:16px;position:relative;cursor:pointer;}
+.bbg{position:absolute;inset:0;background:linear-gradient(135deg,#1a1a2a,#2a1a1a);opacity:.92;}
+.blogo{position:relative;z-index:1;display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.blogo-i{width:34px;height:34px;border:2px solid #fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.blogo-t{color:#fff;font-size:21px;font-weight:700;letter-spacing:1px;}
+.blink{position:relative;z-index:1;color:#fff;font-size:13px;display:flex;align-items:center;gap:8px;}
+.barr{width:26px;height:26px;border:1px solid rgba(255,255,255,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.newscard{margin:0 18px 6px;border-radius:var(--r);overflow:hidden;background:var(--card);backdrop-filter:blur(10px);box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.newsimg{width:100%;height:150px;background:linear-gradient(135deg,#7ab5d4,#5a9ab8);display:flex;align-items:center;justify-content:center;font-size:42px;}
+.newsbody{padding:13px 16px;}
+.newsd{font-size:12px;color:#888;margin-bottom:5px;}
+.newst{font-size:15px;font-weight:600;line-height:1.4;}
+.sdots{display:flex;justify-content:center;gap:6px;margin:8px 0 14px;}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(0,0,0,.18);}
+.dot.on{background:rgba(0,0,0,.52);}
+.dot.on.lg{width:20px;border-radius:4px;}
+.popsvc{margin:0 18px 20px;background:var(--card);border-radius:var(--r);backdrop-filter:blur(10px);overflow:hidden;}
+.psvc{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;
+  border-bottom:1px solid rgba(0,0,0,.06);transition:background .15s;font-size:15px;}
+.psvc:last-child{border-bottom:none;}.psvc:active{background:rgba(0,0,0,.04);}
+.ac{width:28px;height:28px;border-radius:50%;background:#111;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+
+/* ══ DOCS ══ */
+.docs-hdr{font-size:28px;font-weight:700;padding:12px 18px 14px;}
+.doc-track-outer{overflow:hidden;position:relative;height:500px;padding:0;}
+.doc-track{display:flex;gap:14px;position:absolute;top:0;left:22px;will-change:transform;}
+
+.doc-slot{
+  width:346px;height:492px;flex-shrink:0;perspective:1200px;position:relative;
+  will-change:transform,opacity;
+  transition:transform 0.40s cubic-bezier(0.34,1.2,0.64,1),opacity 0.40s ease;
+  transform:scale(0.88) translateY(22px);opacity:0.62;cursor:pointer;
+}
+.doc-slot.sel{transform:scale(1) translateY(0);opacity:1;cursor:pointer;}
+
+.doc-flipper{width:100%;height:100%;transform-style:preserve-3d;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.doc-flipper.flipped{transform:rotateY(180deg);}
+.doc-face,.doc-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:24px;overflow:hidden;}
+.doc-back{transform:rotateY(180deg);}
+
+.doc-card{
+  width:100%;height:100%;
+  background:rgba(255,255,255,.48);
+  backdrop-filter:blur(20px);
+  box-shadow:0 10px 40px rgba(0,0,0,.14);
+  border-radius:24px;padding:18px 18px 0;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.dc-title{font-size:19px;font-weight:700;margin-bottom:12px;line-height:1.25;}
+.prow{display:flex;gap:12px;flex:1;overflow:hidden;}
+.pp-photo{
+  width:120px;height:148px;border-radius:12px;
+  background:linear-gradient(135deg,#c4d4e0,#a0b8cc);
+  overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+}
+.pp-photo img{width:100%;height:100%;object-fit:cover;}
+.pp-info{flex:1;padding-top:2px;}
+.pil{font-size:11px;color:#888;margin-bottom:1px;margin-top:10px;}
+.pil:first-child{margin-top:0;}
+.piv{font-size:14px;font-weight:600;margin-bottom:3px;}
+.sig-wrap{margin-top:8px;height:44px;display:flex;align-items:center;}
+.sig-wrap img{max-width:100px;max-height:42px;object-fit:contain;}
+.sig-wrap .sig-txt{font-size:22px;color:#333;opacity:.55;font-style:italic;font-family:Georgia,serif;}
+
+.vbar{
+  background:linear-gradient(90deg,#00a846,#00c050);
+  padding:0;margin:0 -18px;
+  font-size:11px;color:#fff;overflow:hidden;flex-shrink:0;height:26px;
+  display:flex;align-items:center;
+}
+.vbar-inner{display:inline-block;white-space:nowrap;animation:marquee 22s linear infinite;}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+.name-row{display:flex;align-items:flex-end;justify-content:space-between;padding:10px 0 12px;}
+.fullname{font-size:18px;font-weight:700;line-height:1.22;}
+.morebtn{width:34px;height:34px;border-radius:50%;background:#111;color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;flex-shrink:0;margin-left:8px;}
+
+.tax-card{
+  width:100%;height:100%;
+  background:rgba(255,255,255,.48);
+  backdrop-filter:blur(20px);
+  box-shadow:0 10px 40px rgba(0,0,0,.14);
+  border-radius:24px;padding:18px 18px 0;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.tax-lbl{font-size:12px;color:#777;margin-bottom:2px;}
+.tax-nm{font-size:18px;font-weight:700;line-height:1.25;margin:10px 0 6px;}
+.tax-dob{font-size:14px;color:#555;margin-bottom:8px;}
+.tax-num-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0 12px;}
+.tax-num{font-size:22px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:7px;}
+.copybtn{font-size:17px;opacity:.42;cursor:pointer;}
+
+.qr-back{
+  width:100%;height:100%;background:#fff;
+  border-radius:24px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;padding:22px;
+}
+.qr-label{font-size:13px;color:#555;font-weight:600;text-align:center;}
+.qr-timer{font-size:28px;font-weight:700;color:#111;letter-spacing:2px;font-variant-numeric:tabular-nums;}
+.qr-note{font-size:11px;color:#aaa;text-align:center;}
+.qr-nm{font-size:15px;font-weight:700;text-align:center;line-height:1.3;color:#111;}
+
+.doc-dots{display:flex;justify-content:center;gap:6px;margin:10px 0 8px;align-items:center;}
+.doc-dots .dot{transition:width .3s ease,background .3s ease;}
+
+.doc-add-inner{
+  width:100%;height:100%;background:rgba(255,255,255,.28);border-radius:24px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  border:2px dashed rgba(0,0,0,.1);cursor:pointer;
+  transform:scale(0.88) translateY(22px);
+}
+
+/* ══ SERVICES ══ */
+.svc-hdr{font-size:28px;font-weight:700;padding:12px 18px 10px;}
+.search-bar{margin:0 18px 14px;background:rgba(255,255,255,.72);border-radius:14px;
+  display:flex;align-items:center;gap:9px;padding:12px 16px;backdrop-filter:blur(8px);}
+.search-bar span{color:#888;font-size:14px;}
+.svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:0 18px;}
+.svc-item{background:rgba(255,255,255,.62);border-radius:16px;padding:17px 13px 13px;
+  cursor:pointer;backdrop-filter:blur(8px);transition:transform .15s;}
+.svc-item:active{transform:scale(.97);}
+.svc-ico{width:44px;height:44px;border-radius:50%;background:#111;display:flex;align-items:center;
+  justify-content:center;margin-bottom:10px;color:#fff;}
+.svc-ico svg{width:22px;height:22px;}
+.svc-nm{font-size:13px;font-weight:500;line-height:1.3;}
+
+/* ══ MENU ══ */
+.menu-hdr{font-size:32px;font-weight:700;padding:12px 18px 3px;}
+.menu-ver{padding:0 18px 18px;font-size:13px;color:#666;}
+.mgrp{margin:0 18px 11px;background:var(--card);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(10px);}
+.mit{display:flex;align-items:center;gap:13px;padding:16px 18px;cursor:pointer;
+  border-bottom:1px solid rgba(0,0,0,.06);transition:background .15s;font-size:16px;}
+.mit:last-child{border-bottom:none;}.mit:active{background:rgba(0,0,0,.04);}
+.mico{font-size:19px;opacity:.72;}
+.out-btn{margin:8px 18px 24px;background:#111;color:#fff;border:none;border-radius:30px;
+  width:calc(100% - 36px);padding:18px;font-size:17px;font-weight:600;cursor:pointer;
+  letter-spacing:.5px;transition:opacity .2s;}
+.out-btn:active{opacity:.78;}
+
+/* ══ SETTINGS ══ */
+.set-hdr{display:flex;align-items:center;gap:14px;padding:12px 18px 6px;}
+.back-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.7);
+  display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:300;
+  cursor:pointer;backdrop-filter:blur(8px);flex-shrink:0;}
+.set-title{font-size:22px;font-weight:700;}
+.set-photo-row{display:flex;gap:20px;justify-content:center;padding:16px 18px 10px;}
+.set-photo-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.set-photo{width:88px;height:88px;border-radius:50%;
+  background:linear-gradient(135deg,#c8d8e4,#a8c0d0);
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+  position:relative;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.12);}
+.set-photo img{width:100%;height:100%;object-fit:cover;}
+.photo-badge{position:absolute;bottom:2px;right:2px;width:24px;height:24px;border-radius:50%;
+  background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid #fff;}
+.set-photo-lbl{font-size:11px;color:#666;text-align:center;}
+.set-form{padding:0 18px;}
+.set-group{background:var(--card);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(10px);margin-bottom:12px;}
+.set-row{padding:12px 18px;border-bottom:1px solid rgba(0,0,0,.06);}
+.set-row:last-child{border-bottom:none;}
+.set-row label{display:block;font-size:12px;color:#888;margin-bottom:4px;}
+.set-row input{width:100%;border:none;background:transparent;font-size:16px;font-weight:500;
+  color:#111;outline:none;font-family:inherit;}
+.sig-row{padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
+.sig-preview{height:44px;flex:1;display:flex;align-items:center;}
+.sig-preview canvas,.sig-preview img{max-height:44px;max-width:160px;object-fit:contain;border-radius:4px;}
+.sig-preview .sig-empty{font-size:13px;color:#aaa;}
+.sig-edit-btn{background:#111;color:#fff;border:none;border-radius:10px;
+  padding:8px 14px;font-size:13px;cursor:pointer;flex-shrink:0;margin-left:10px;}
+.save-btn{margin:4px 0 24px;background:#111;color:#fff;border:none;border-radius:16px;
+  width:100%;padding:16px;font-size:16px;font-weight:600;cursor:pointer;transition:all .25s;}
+.save-btn:active{opacity:.78;}
+
+.sig-modal{position:absolute;inset:0;z-index:500;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(8px);
+  display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+.sig-modal.open{display:flex;animation:fadeIn .2s ease;}
+.sig-modal-box{background:#fff;border-radius:24px;padding:20px;width:100%;max-width:340px;}
+.sig-modal-title{font-size:18px;font-weight:700;margin-bottom:4px;text-align:center;}
+.sig-modal-sub{font-size:13px;color:#888;text-align:center;margin-bottom:14px;}
+.sig-canvas-wrap{border:2px dashed #ddd;border-radius:16px;overflow:hidden;
+  background:#fafafa;position:relative;touch-action:none;}
+#sigCanvas{display:block;width:100%;height:160px;cursor:crosshair;}
+.sig-modal-btns{display:flex;gap:10px;margin-top:14px;}
+.sig-btn{flex:1;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;}
+.sig-btn-clear{background:#f2f2f2;color:#333;}
+.sig-btn-save{background:#111;color:#fff;}
+</style>
+</head>
+<body>
+<div class="shell"><div class="phone">
+<div class="grad-bg"></div>
+
+<!-- ══ PIN ══ -->
+<div class="scr active" id="s-pin" style="align-items:center;justify-content:center;">
+  <p class="pin-ttl" style="margin-top:70px">Код для входу</p>
+  <div class="pin-dots">
+    <div class="pdot" id="pd0"></div><div class="pdot" id="pd1"></div>
+    <div class="pdot" id="pd2"></div><div class="pdot" id="pd3"></div>
+  </div>
+  <div class="pgrid">
+    <button class="pb" onclick="pp(1)">1</button><button class="pb" onclick="pp(2)">2</button><button class="pb" onclick="pp(3)">3</button>
+    <button class="pb" onclick="pp(4)">4</button><button class="pb" onclick="pp(5)">5</button><button class="pb" onclick="pp(6)">6</button>
+    <button class="pb" onclick="pp(7)">7</button><button class="pb" onclick="pp(8)">8</button><button class="pb" onclick="pp(9)">9</button>
+    <button class="pb fp">🫆</button><button class="pb" onclick="pp(0)">0</button><button class="pb del" onclick="pd()">⌫</button>
+  </div>
+  <p class="pfgt">Не пам'ятаю код для входу</p>
+</div>
+
+<!-- ══ HOME ══ -->
+<div class="scr" id="s-home">
+  <div class="sb-body">
+    <div class="greet" id="greeting">Привіт, Кирило 👋</div>
+    <div style="padding:0 18px 3px"><span class="slabel" style="margin:0">Нові повідомлення</span></div>
+    <div class="ncard"><div class="ncard-lbl">Опитування</div><div class="ncard-txt">Оберіть десятого фіналіста Нацвідбору, який позмагається за право представит…</div></div>
+    <div class="nzcard">
+      <div class="nztitle">Незламність</div>
+      <div class="nzdesc">Мапа укриттів, Пунктів незламності та відділень Power Banking.<br>Заява про відсутній зв'язок.</div>
+      <div class="nzrow"><div class="nzi nzi-b">🔵</div><div class="nzi nzi-y">⚡</div><div class="nzi nzi-g">🏛</div><div class="arrbtn">→</div></div>
+    </div>
+    <div class="qas">
+      <div class="qa"><div class="qai"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="17" y="14" width="4" height="2"/><rect x="17" y="18" width="4" height="2"/><rect x="14" y="14" width="2" height="6"/></svg></div><div class="qal">Сканувати QR-код</div></div>
+      <div class="qa"><div class="qai"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 2C8.68 2 6 4.68 6 8c0 2.06.99 3.87 2.5 5L12 22l3.5-9C17.01 11.87 18 10.06 18 8c0-3.32-2.68-6-6-6zm0 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></div><div class="qal">Військові облігації</div></div>
+      <div class="qa"><div class="qai"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A11 11 0 0 1 19 12.55M5 12.55a11 11 0 0 1 5.17-2.39M10.71 5.05A11 11 0 0 1 22.56 9M1.42 9a11 11 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg></div><div class="qal">Відсутній зв'язок</div></div>
+    </div>
+    <div class="banner"><div class="bbg"></div><div class="blogo"><div class="blogo-i">⚜️</div><div class="blogo-t">ЛІНІЯ ДРОНІВ</div></div><div class="blink">Змінити хід подій <div class="barr">→</div></div></div>
+    <div style="padding:0 18px 3px"><span class="slabel">Що нового?</span></div>
+    <div class="newscard"><div class="newsimg">🔌</div><div class="newsbody"><div class="newsd">06 березня, 16:05</div><div class="newst">246+ млн грн для тих, хто відновлює країну</div></div></div>
+    <div class="sdots"><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div style="padding:0 18px 7px"><span class="slabel">Популярні послуги</span></div>
+    <div class="popsvc">
+      <div class="psvc" onclick="goTo('s-services')"><span>Опитування</span><div class="ac">→</div></div>
+      <div class="psvc"><span>Заміна водійського посвідчення</span><div class="ac">→</div></div>
+      <div class="psvc"><span>Податки ФОП</span><div class="ac">→</div></div>
+    </div>
+  </div>
+  <nav class="bnav">
+    <div class="ni on" onclick="navTo('s-home',this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22" fill="currentColor"/></svg><span>Стрічка</span></div>
+    <div class="ni stroke" onclick="navTo('s-docs',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><rect x="5.5" y="5.5" width="5.5" height="5" rx="1.2"/><line x1="12.5" y1="7" x2="18.5" y2="7"/><line x1="5.5" y1="13.5" x2="18.5" y2="13.5"/><line x1="5.5" y1="16.5" x2="13.5" y2="16.5"/></svg><span>Документи</span></div>
+    <div class="ni" onclick="navTo('s-services',this)"><div class="nwrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><div class="bolt-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="#111"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div></div><span>Сервіси</span></div>
+    <div class="ni" onclick="navTo('s-menu',this)"><div class="nwrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg><div class="ndot"></div></div><span>Меню</span></div>
+  </nav>
+</div>
+
+<!-- ══ DOCS ══ -->
+<div class="scr" id="s-docs">
+  <div class="sb-body" style="overflow:hidden;">
+    <div class="docs-hdr">Документи</div>
+    <div class="doc-track-outer" id="docOuter">
+      <div class="doc-track" id="docTrack">
+
+        <!-- PASSPORT -->
+        <div class="doc-slot sel" id="slot-0" onclick="onSlotClick(0)">
+          <div class="doc-flipper" id="flip-0">
+            <div class="doc-face">
+              <div class="doc-card">
+                <div class="dc-title">Паспорт громадянина України</div>
+                <div class="prow">
+                  <div class="pp-photo" id="pp-photo"><span style="font-size:42px">👤</span></div>
+                  <div class="pp-info">
+                    <div class="pil">Дата народження:</div>
+                    <div class="piv" id="pp-dob">07.03.2009</div>
+                    <div class="pil">Номер:</div>
+                    <div class="piv">008974424</div>
+                    <div class="sig-wrap" id="sig-wrap-0"><span class="sig-txt">𝒮𝒾𝑔𝓃</span></div>
+                  </div>
+                </div>
+                <div class="vbar"><span class="vbar-inner" id="vbar0"></span></div>
+                <div class="name-row">
+                  <div class="fullname" id="pp-name">Трофименко<br>Кирило<br>Євгенійович</div>
+                  <div class="morebtn">•••</div>
+                </div>
+              </div>
+            </div>
+            <div class="doc-back">
+              <div class="qr-back">
+                <div class="qr-label">Паспорт громадянина України</div>
+                <canvas id="qrCanvas0" width="480" height="480" style="width:220px;height:220px;border-radius:8px;"></canvas>
+                <div class="qr-timer" id="qr-t-0">3:00</div>
+                <div class="qr-note">Торкніться щоб повернутись</div>
+                <div class="qr-nm" id="qr-nm-0">Трофименко<br>Кирило<br>Євгенійович</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAX -->
+        <div class="doc-slot" id="slot-1" onclick="onSlotClick(1)">
+          <div class="doc-flipper" id="flip-1">
+            <div class="doc-face">
+              <div class="tax-card">
+                <div class="dc-title">Картка платника податків</div>
+                <div style="flex:1">
+                  <div class="tax-lbl">РНОКПП</div>
+                  <div class="tax-nm" id="tax-name">Трофименко<br>Кирило<br>Євгенійович</div>
+                  <div class="tax-lbl">Дата народження:</div>
+                  <div class="tax-dob" id="tax-dob">07.03.2009</div>
+                </div>
+                <div class="vbar"><span class="vbar-inner" id="vbar1"></span></div>
+                <div class="tax-num-row">
+                  <div class="tax-num">3987804511 <span class="copybtn" id="cpbtn" onclick="event.stopPropagation();copyTax()">⧉</span></div>
+                  <div class="morebtn">•••</div>
+                </div>
+              </div>
+            </div>
+            <div class="doc-back">
+              <div class="qr-back">
+                <div class="qr-label">Картка платника податків</div>
+                <canvas id="qrCanvas1" width="480" height="480" style="width:220px;height:220px;border-radius:8px;"></canvas>
+                <div class="qr-timer" id="qr-t-1">3:00</div>
+                <div class="qr-note">Торкніться щоб повернутись</div>
+                <div class="qr-nm">Картка платника податків</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOREIGN PASSPORT -->
+        <div class="doc-slot" id="slot-2" onclick="onSlotClick(2)">
+          <div class="doc-flipper" id="flip-2">
+            <div class="doc-face">
+              <div class="doc-card">
+                <div class="dc-title">Закордонний паспорт</div>
+                <div class="prow">
+                  <div class="pp-photo" id="fp-photo"><span style="font-size:42px">👤</span></div>
+                  <div class="pp-info">
+                    <div class="pil">Дата народження:</div>
+                    <div class="piv" id="fp-dob">07.03.2009</div>
+                    <div class="pil">Номер:</div>
+                    <div class="piv">GE518798</div>
+                    <div class="sig-wrap" id="sig-wrap-2"><span class="sig-txt">𝒮𝒾𝑔𝓃</span></div>
+                  </div>
+                </div>
+                <div class="vbar"><span class="vbar-inner" id="vbar2"></span></div>
+                <div class="name-row">
+                  <div class="fullname" id="fp-name">Трофименко<br>Кирило<br>Євгенійович</div>
+                  <div class="morebtn">•••</div>
+                </div>
+              </div>
+            </div>
+            <div class="doc-back">
+              <div class="qr-back">
+                <div class="qr-label">Закордонний паспорт</div>
+                <canvas id="qrCanvas2" width="480" height="480" style="width:220px;height:220px;border-radius:8px;"></canvas>
+                <div class="qr-timer" id="qr-t-2">3:00</div>
+                <div class="qr-note">Торкніться щоб повернутись</div>
+                <div class="qr-nm" id="qr-nm-2">Трофименко<br>Кирило<br>Євгенійович</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="width:220px;height:492px;flex-shrink:0;">
+          <div class="doc-add-inner">
+            <div style="font-size:36px;color:rgba(0,0,0,.3)">+</div>
+            <div style="font-size:14px;color:#888">Додати документ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-dots" id="docDots">
+      <div class="dot on"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+  <nav class="bnav">
+    <div class="ni" onclick="navTo('s-home',this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22" fill="currentColor"/></svg><span>Стрічка</span></div>
+    <div class="ni on stroke" onclick="navTo('s-docs',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><rect x="5.5" y="5.5" width="5.5" height="5" rx="1.2"/><line x1="12.5" y1="7" x2="18.5" y2="7"/><line x1="5.5" y1="13.5" x2="18.5" y2="13.5"/><line x1="5.5" y1="16.5" x2="13.5" y2="16.5"/></svg><span>Документи</span></div>
+    <div class="ni" onclick="navTo('s-services',this)"><div class="nwrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><div class="bolt-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="#111"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div></div><span>Сервіси</span></div>
+    <div class="ni" onclick="navTo('s-menu',this)"><div class="nwrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg><div class="ndot"></div></div><span>Меню</span></div>
+  </nav>
+</div>
+
+<!-- ══ SERVICES ══ -->
+<div class="scr" id="s-services">
+  <div class="sb-body">
+    <div class="svc-hdr">Сервіси</div>
+    <div class="search-bar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span>Пошук</span></div>
+    <div class="svc-grid" id="svcGrid"></div>
+    <div style="height:16px"></div>
+  </div>
+  <nav class="bnav">
+    <div class="ni" onclick="navTo('s-home',this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22" fill="currentColor"/></svg><span>Стрічка</span></div>
+    <div class="ni stroke" onclick="navTo('s-docs',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><rect x="5.5" y="5.5" width="5.5" height="5" rx="1.2"/><line x1="12.5" y1="7" x2="18.5" y2="7"/><line x1="5.5" y1="13.5" x2="18.5" y2="13.5"/><line x1="5.5" y1="16.5" x2="13.5" y2="16.5"/></svg><span>Документи</span></div>
+    <div class="ni on" onclick="navTo('s-services',this)"><div class="nwrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><div class="bolt-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="#111"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div></div><span>Сервіси</span></div>
+    <div class="ni" onclick="navTo('s-menu',this)"><div class="nwrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg><div class="ndot"></div></div><span>Меню</span></div>
+  </nav>
+</div>
+
+<!-- ══ MENU ══ -->
+<div class="scr" id="s-menu">
+  <div class="sb-body">
+    <div class="menu-hdr">Меню</div>
+    <div class="menu-ver">Версія Дії: 4.31.2.2444</div>
+    <div class="mgrp"><div class="mit"><span class="mico">✉️</span><span>Повідомлення</span><div style="margin-left:auto;width:8px;height:8px;background:#f33;border-radius:50%;"></div></div></div>
+    <div class="mgrp">
+      <div class="mit"><span class="mico">🔑</span><span>Дія.Підпис</span></div>
+      <div class="mit"><span class="mico">📑</span><span>Історія підписань</span></div>
+    </div>
+    <div class="mgrp">
+      <div class="mit" onclick="goTo('s-settings')"><span class="mico">⚙️</span><span>Налаштування</span><span style="margin-left:auto;color:#bbb;font-size:20px;font-weight:300">›</span></div>
+      <div class="mit"><span class="mico">🔄</span><span>Оновити застосунок</span></div>
+      <div class="mit"><span class="mico">📱</span><span>Підключені пристрої</span></div>
+    </div>
+    <div class="mgrp">
+      <div class="mit"><span class="mico">💬</span><span>Служба підтримки</span></div>
+      <div class="mit"><span class="mico">📋</span><span>Копіювати номер пристрою</span></div>
+      <div class="mit"><span class="mico">❓</span><span>Питання та відповіді</span></div>
+    </div>
+    <button class="out-btn" onclick="goTo('s-pin')">ВИЙТИ</button>
+  </div>
+  <nav class="bnav">
+    <div class="ni" onclick="navTo('s-home',this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22" fill="currentColor"/></svg><span>Стрічка</span></div>
+    <div class="ni stroke" onclick="navTo('s-docs',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><rect x="5.5" y="5.5" width="5.5" height="5" rx="1.2"/><line x1="12.5" y1="7" x2="18.5" y2="7"/><line x1="5.5" y1="13.5" x2="18.5" y2="13.5"/><line x1="5.5" y1="16.5" x2="13.5" y2="16.5"/></svg><span>Документи</span></div>
+    <div class="ni" onclick="navTo('s-services',this)"><div class="nwrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><div class="bolt-badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="#111"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div></div><span>Сервіси</span></div>
+    <div class="ni on" onclick="navTo('s-menu',this)"><div class="nwrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/></svg><div class="ndot"></div></div><span>Меню</span></div>
+  </nav>
+</div>
+
+<!-- ══ SETTINGS ══ -->
+<div class="scr" id="s-settings">
+  <div class="sb-body">
+    <div class="set-hdr">
+      <div class="back-btn" onclick="goTo('s-menu')">‹</div>
+      <div class="set-title">Налаштування профілю</div>
+    </div>
+    <div class="set-photo-row">
+      <div class="set-photo-col">
+        <div class="set-photo" onclick="document.getElementById('pi0').click()">
+          <span id="spe0" style="font-size:36px">👤</span>
+          <img id="spi0" src="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">
+          <div class="photo-badge">✎</div>
+        </div>
+        <div class="set-photo-lbl">Паспорт</div>
+        <input type="file" id="pi0" accept="image/*" style="display:none" onchange="handlePhoto(event,0)">
+      </div>
+      <div class="set-photo-col">
+        <div class="set-photo" onclick="document.getElementById('pi1').click()">
+          <span id="spe1" style="font-size:36px">👤</span>
+          <img id="spi1" src="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">
+          <div class="photo-badge">✎</div>
+        </div>
+        <div class="set-photo-lbl">Закордонний</div>
+        <input type="file" id="pi1" accept="image/*" style="display:none" onchange="handlePhoto(event,1)">
+      </div>
+    </div>
+    <div class="set-form">
+      <div class="set-group">
+        <div class="set-row"><label>Прізвище</label><input id="inp-last" value="Трофименко"></div>
+        <div class="set-row"><label>Ім'я</label><input id="inp-first" value="Кирило"></div>
+        <div class="set-row"><label>По батькові</label><input id="inp-mid" value="Євгенійович"></div>
+      </div>
+      <div class="set-group">
+        <div class="set-row"><label>Дата народження</label><input id="inp-dob" value="07.03.2009"></div>
+      </div>
+      <div class="set-group">
+        <div style="padding:12px 18px 6px"><label style="font-size:12px;color:#888">Підпис</label></div>
+        <div class="sig-row">
+          <div class="sig-preview" id="sigPreview"><span class="sig-empty">Намалюйте підпис →</span></div>
+          <button class="sig-edit-btn" onclick="openSigPad()">✎ Намалювати</button>
+        </div>
+      </div>
+      <button class="save-btn" id="saveBtn" onclick="saveSettings()">Зберегти зміни</button>
+    </div>
+  </div>
+  <div class="sig-modal" id="sigModal">
+    <div class="sig-modal-box">
+      <div class="sig-modal-title">Ваш підпис</div>
+      <div class="sig-modal-sub">Намалюйте підпис пальцем або мишкою</div>
+      <div class="sig-canvas-wrap"><canvas id="sigCanvas"></canvas></div>
+      <div class="sig-modal-btns">
+        <button class="sig-btn sig-btn-clear" onclick="clearSig()">Стерти</button>
+        <button class="sig-btn sig-btn-save" onclick="saveSig()">Зберегти підпис</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div></div>
+
+<script>
+/* ──── SVG ICONS FOR SERVICES (monochrome) ──── */
+const SVC_ICONS={
+shield:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>`,
+bolt:`<svg viewBox="0 0 24 24" fill="white"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+card:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
+bond:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+drone:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><line x1="6" y1="9" x2="6" y2="12"/><line x1="18" y1="9" x2="18" y2="12"/><rect x="4" y="12" width="16" height="6" rx="2"/><line x1="12" y1="18" x2="12" y2="22"/></svg>`,
+tag:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>`,
+target:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+wrench:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>`,
+clip:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>`,
+fitness:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M6 5v14M18 5v14M6 12h12M3 8v8M21 8v8"/></svg>`,
+car:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M5 17h14M5 17a2 2 0 01-2-2v-4l2-5h14l2 5v4a2 2 0 01-2 2M5 17a2 2 0 100 4 2 2 0 000-4zM19 17a2 2 0 100 4 2 2 0 000-4z"/></svg>`,
+home:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>`,
+chart:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>`,
+hands:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M11 17l-1.5 1.5a2.12 2.12 0 01-3 0L2 14M20.5 10L17 6.5M2 14l5-5 4 4-1 1"/><path d="M22 10l-5.5 5.5a2.12 2.12 0 01-3 0l-.5-.5"/></svg>`,
+heart:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>`,
+box:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+brief:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/></svg>`,
+coins:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="9" cy="12" r="7"/><path d="M15 5.5A7 7 0 0122 12a7 7 0 01-7 6.5"/><line x1="9" y1="9" x2="9" y2="15"/><line x1="6" y1="12" x2="12" y2="12"/></svg>`,
+scale:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 3v18"/><path d="M5 7l7-4 7 4"/><path d="M5 7l-2 8h6l-2-8"/><path d="M19 7l-2 8h6l-2-8"/></svg>`,
+house2:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><rect x="9" y="14" width="6" height="8"/></svg>`,
+alert:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+doc:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>`
+};
+
+const SVC_LIST=[
+['shield','Допомога армії'],['bolt','Незламність'],['card','Дія.Картка'],['bond','Військові облігації'],
+['drone','Лінія дронів'],['tag','Національний кешбек'],['target','Чатбот єВорог'],['wrench','єВідновлення'],
+['clip','Реєстр збитків'],['fitness','Ветеранський спорт'],['car','Водієві'],['home','Місце проживання'],
+['chart','Опитування'],['hands','Допомога від держави'],['heart','Шлюб онлайн'],['box','Послуги для ВПО'],
+['brief','Податки'],['coins','Допомога по безробіттю'],['scale','Судові послуги'],['house2','єОселя'],
+['alert','Виконавчі провадження'],['doc','Довідки та витяги']
+];
+
+(function buildSvc(){
+  const g=document.getElementById('svcGrid');
+  SVC_LIST.forEach(([ico,nm])=>{
+    g.innerHTML+=`<div class="svc-item"><div class="svc-ico">${SVC_ICONS[ico]}</div><div class="svc-nm">${nm}</div></div>`;
+  });
+})();
+
+/* ──── MARQUEE (seamless) ──── */
+function getBarText(){
+  const n=new Date(),d=String(n.getDate()).padStart(2,'0'),m=String(n.getMonth()+1).padStart(2,'0'),y=n.getFullYear();
+  const today=`${d}.${m}.${y}`;
+  const c=Math.floor(Date.now()/30000)%2;
+  const base=c===0
+    ?`Документ працює під час військового стану &nbsp; ◆ &nbsp; наша славна Україна, гей, гей, гей &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`
+    :`${today} оновлено документ &nbsp; ◆ &nbsp; Документ діє на території України &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+  return base+base;
+}
+function refreshBars(){const t=getBarText();['vbar0','vbar1','vbar2'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=t;});}
+refreshBars();setInterval(refreshBars,30000);
+
+/* ──── PIN ──── */
+let pv='';
+function pp(n){if(pv.length>=4)return;pv+=n;upd();if(pv.length===4){setTimeout(()=>{navTo('s-home',document.querySelector('#s-home .ni'));pv='';upd();},300);}}
+function pd(){pv=pv.slice(0,-1);upd();}
+function upd(){for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('on',i<pv.length);}
+
+/* ──── NAVIGATION ──── */
+function goTo(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function navTo(id,el){
+  goTo(id);
+  document.querySelectorAll('.bnav').forEach(nav=>{
+    nav.querySelectorAll('.ni').forEach(ni=>ni.classList.remove('on'));
+  });
+  document.querySelectorAll('.bnav').forEach(nav=>{
+    nav.querySelectorAll('.ni').forEach(ni=>{
+      if(ni.getAttribute('onclick')&&ni.getAttribute('onclick').includes("'"+id+"'"))ni.classList.add('on');
+    });
+  });
+}
+
+/* ──── CAROUSEL ──── */
+const CARD_W=346,GAP=14,NUM_CARDS=3;
+let curCard=0;
+const flipped=[false,false,false],timers=[null,null,null],secs=[180,180,180];
+
+function updateCarousel(animated=true){
+  const track=document.getElementById('docTrack');
+  const offset=-(curCard*(CARD_W+GAP));
+  track.style.transition=animated?'transform 0.42s cubic-bezier(0.25,0.46,0.45,0.94)':'none';
+  track.style.transform=`translateX(${offset}px)`;
+  for(let i=0;i<NUM_CARDS;i++){
+    document.getElementById('slot-'+i).classList.toggle('sel',i===curCard);
+  }
+  const dots=document.querySelectorAll('#docDots .dot');
+  dots.forEach((d,i)=>{d.classList.toggle('on',i===curCard);d.classList.toggle('lg',i===curCard);});
+}
+
+function onSlotClick(idx){
+  if(idx!==curCard){curCard=idx;updateCarousel(true);}
+  else flipCard(idx);
+}
+
+let tx0=0,swiping=false;
+const outer=document.getElementById('docOuter');
+outer.addEventListener('touchstart',e=>{tx0=e.touches[0].clientX;swiping=true;},{passive:true});
+outer.addEventListener('touchmove',e=>{
+  if(!swiping)return;
+  const dx=e.touches[0].clientX-tx0;
+  const dy=e.touches[0].clientY-(e.touches[0].clientY);
+  if(Math.abs(dx)>8)e.preventDefault();
+},{passive:false});
+outer.addEventListener('touchend',e=>{
+  if(!swiping)return;swiping=false;
+  const dx=e.changedTouches[0].clientX-tx0;
+  if(Math.abs(dx)>55){
+    if(dx<0&&curCard<NUM_CARDS-1)curCard++;
+    else if(dx>0&&curCard>0)curCard--;
+  }
+  updateCarousel(true);
+});
+
+/* ──── QR (realistic, hi-res canvas) ──── */
+function drawQR(id){
+  const c=document.getElementById(id);if(!c)return;
+  const ctx=c.getContext('2d');
+  const s=c.width; // 480
+  const cells=37;
+  const ms=s/cells;
+  
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,s,s);
+
+  const g=[];
+  for(let i=0;i<cells;i++){g[i]=[];for(let j=0;j<cells;j++)g[i][j]=false;}
+
+  function finder(ox,oy){
+    for(let y=0;y<7;y++)for(let x=0;x<7;x++){
+      const border=x===0||x===6||y===0||y===6;
+      const inner=x>=2&&x<=4&&y>=2&&y<=4;
+      if(border||inner)g[oy+y][ox+x]=true;
+    }
+  }
+  finder(0,0);finder(cells-7,0);finder(0,cells-7);
+
+  // Alignment at (30,30)
+  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+    const edge=Math.abs(dx)===2||Math.abs(dy)===2;
+    const center=dx===0&&dy===0;
+    if(edge||center)g[30+dy][30+dx]=true;
+  }
+
+  // Timing
+  for(let i=8;i<cells-8;i++){g[6][i]=i%2===0;g[i][6]=i%2===0;}
+
+  // Dark module
+  g[cells-8][8]=true;
+
+  // Format info strips (visual, simplified)
+  const fmtBits=[1,0,1,1,0,0,1,0,0,1,1,0,1,0,1];
+  for(let i=0;i<8;i++){
+    if(i<fmtBits.length){g[8][i===6?7:i]=!!fmtBits[i];g[i===6?7:i][8]=!!fmtBits[i];}
+  }
+
+  // Pseudo-random data
+  const ci=parseInt(id.replace(/\D/g,''))||0;
+  const sd=Date.now()+ci*77773;
+
+  for(let y=0;y<cells;y++)for(let x=0;x<cells;x++){
+    const inFinder=(x<=7&&y<=7)||(x>=cells-8&&y<=7)||(x<=7&&y>=cells-8);
+    const inAlign=(x>=28&&x<=32&&y>=28&&y<=32);
+    const inTiming=(x===6||y===6);
+    const inDark=(x===8&&y===cells-8);
+    const inFmt=(y===8&&x<=8)||(x===8&&y<=8)||(y===8&&x>=cells-8)||(x===8&&y>=cells-8);
+
+    if(inFinder||inAlign||inTiming||inDark||inFmt)continue;
+    
+    const h=((x*2654435761+y*2246822519+sd*16777619)>>>0);
+    g[y][x]=(h%100)<46;
+  }
+
+  // Render with slight rounding for polished look
+  ctx.fillStyle='#1a1a1a';
+  const r=ms*0.12;
+  for(let y=0;y<cells;y++)for(let x=0;x<cells;x++){
+    if(!g[y][x])continue;
+    const px=x*ms,py=y*ms;
+    // Check neighbors - if surrounded, draw square; else round
+    const hasTop=y>0&&g[y-1][x];
+    const hasBot=y<cells-1&&g[y+1][x];
+    const hasLeft=x>0&&g[y][x-1];
+    const hasRight=x<cells-1&&g[y][x+1];
+    
+    const rtl=(!hasTop&&!hasLeft)?r:0;
+    const rtr=(!hasTop&&!hasRight)?r:0;
+    const rbr=(!hasBot&&!hasRight)?r:0;
+    const rbl=(!hasBot&&!hasLeft)?r:0;
+    
+    ctx.beginPath();
+    ctx.moveTo(px+rtl,py);
+    ctx.lineTo(px+ms-rtr,py);
+    if(rtr)ctx.quadraticCurveTo(px+ms,py,px+ms,py+rtr);
+    else ctx.lineTo(px+ms,py);
+    ctx.lineTo(px+ms,py+ms-rbr);
+    if(rbr)ctx.quadraticCurveTo(px+ms,py+ms,px+ms-rbr,py+ms);
+    else ctx.lineTo(px+ms,py+ms);
+    ctx.lineTo(px+rbl,py+ms);
+    if(rbl)ctx.quadraticCurveTo(px,py+ms,px,py+ms-rbl);
+    else ctx.lineTo(px,py+ms);
+    ctx.lineTo(px,py+rtl);
+    if(rtl)ctx.quadraticCurveTo(px,py,px+rtl,py);
+    else ctx.lineTo(px,py);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+/* ──── FLIP ──── */
+function flipCard(idx){
+  const f=document.getElementById('flip-'+idx);
+  flipped[idx]=!flipped[idx];
+  f.classList.toggle('flipped',flipped[idx]);
+  if(flipped[idx]){drawQR('qrCanvas'+idx);startTimer(idx);}
+  else stopTimer(idx);
+}
+function startTimer(idx){
+  stopTimer(idx);secs[idx]=180;
+  const el=document.getElementById('qr-t-'+idx);if(el)el.textContent='3:00';
+  timers[idx]=setInterval(()=>{
+    secs[idx]--;if(secs[idx]<0){secs[idx]=180;drawQR('qrCanvas'+idx);}
+    const m=Math.floor(secs[idx]/60),s=secs[idx]%60;
+    if(el)el.textContent=m+':'+(s<10?'0':'')+s;
+  },1000);
+}
+function stopTimer(idx){if(timers[idx]){clearInterval(timers[idx]);timers[idx]=null;}}
+
+/* ──── PHOTOS ──── */
+function applyPhoto(dataUrl,idx){
+  if(!dataUrl)return;
+  const imgEl=document.getElementById('spi'+idx);
+  const emEl=document.getElementById('spe'+idx);
+  imgEl.src=dataUrl;imgEl.style.display='block';emEl.style.display='none';
+  const docEl=document.getElementById(idx===0?'pp-photo':'fp-photo');
+  if(docEl)docEl.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:12px">`;
+}
+function handlePhoto(e,idx){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{localStorage.setItem('dp'+idx,ev.target.result);}catch(e){}applyPhoto(ev.target.result,idx);};
+  r.readAsDataURL(f);
+}
+try{['dp0','dp1'].forEach((k,i)=>{const v=localStorage.getItem(k);if(v)applyPhoto(v,i);});}catch(e){}
+
+/* ──── SIGNATURE PAD ──── */
+let sigDrawing=false,sigLastX=0,sigLastY=0;
+const sigCanvas=document.getElementById('sigCanvas');
+const sigCtx=sigCanvas.getContext('2d');
+function initSigCanvas(){
+  const wrap=sigCanvas.parentElement;const r=wrap.getBoundingClientRect();
+  sigCanvas.width=r.width||300;sigCanvas.height=160;
+  sigCtx.strokeStyle='#111';sigCtx.lineWidth=3;sigCtx.lineCap='round';sigCtx.lineJoin='round';
+}
+function getPos(e){
+  const r=sigCanvas.getBoundingClientRect();const src=e.touches?e.touches[0]:e;
+  return{x:(src.clientX-r.left)*(sigCanvas.width/r.width),y:(src.clientY-r.top)*(sigCanvas.height/r.height)};
+}
+sigCanvas.addEventListener('mousedown',e=>{sigDrawing=true;const p=getPos(e);sigLastX=p.x;sigLastY=p.y;});
+sigCanvas.addEventListener('mousemove',e=>{if(!sigDrawing)return;const p=getPos(e);sigCtx.beginPath();sigCtx.moveTo(sigLastX,sigLastY);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();sigLastX=p.x;sigLastY=p.y;});
+sigCanvas.addEventListener('mouseup',()=>sigDrawing=false);
+sigCanvas.addEventListener('touchstart',e=>{e.preventDefault();sigDrawing=true;const p=getPos(e);sigLastX=p.x;sigLastY=p.y;},{passive:false});
+sigCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(!sigDrawing)return;const p=getPos(e);sigCtx.beginPath();sigCtx.moveTo(sigLastX,sigLastY);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();sigLastX=p.x;sigLastY=p.y;},{passive:false});
+sigCanvas.addEventListener('touchend',()=>sigDrawing=false);
+function openSigPad(){
+  document.getElementById('sigModal').classList.add('open');
+  setTimeout(initSigCanvas,50);
+  try{const s=localStorage.getItem('diia_sig_img');if(s){const img=new Image();img.onload=()=>sigCtx.drawImage(img,0,0,sigCanvas.width,sigCanvas.height);img.src=s;}}catch(e){}
+}
+function clearSig(){sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);}
+function saveSig(){
+  const dataUrl=sigCanvas.toDataURL('image/png');
+  try{localStorage.setItem('diia_sig_img',dataUrl);}catch(e){}
+  applySig(dataUrl);document.getElementById('sigModal').classList.remove('open');
+}
+function applySig(dataUrl){
+  if(!dataUrl)return;
+  document.getElementById('sigPreview').innerHTML=`<img src="${dataUrl}" style="max-height:44px;max-width:160px;object-fit:contain;border-radius:4px;">`;
+  ['sig-wrap-0','sig-wrap-2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=`<img src="${dataUrl}" style="max-width:100px;max-height:42px;object-fit:contain;">`;
+  });
+}
+try{const s=localStorage.getItem('diia_sig_img');if(s)applySig(s);}catch(e){}
+
+/* ──── SAVE SETTINGS ──── */
+function saveSettings(){
+  const last=document.getElementById('inp-last').value.trim();
+  const first=document.getElementById('inp-first').value.trim();
+  const mid=document.getElementById('inp-mid').value.trim();
+  const dob=document.getElementById('inp-dob').value.trim();
+  try{localStorage.setItem('dl',last);localStorage.setItem('df',first);localStorage.setItem('dm',mid);localStorage.setItem('dd',dob);}catch(e){}
+  applyProfile(last,first,mid,dob);
+  const btn=document.getElementById('saveBtn');
+  btn.textContent='✅ Збережено!';btn.style.background='#00b050';
+  setTimeout(()=>{btn.textContent='Зберегти зміни';btn.style.background='#111';navTo('s-docs',null);},1600);
+}
+function applyProfile(last,first,mid,dob){
+  const full=`${last}<br>${first}<br>${mid}`;
+  ['pp-name','fp-name'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=full;});
+  ['qr-nm-0','qr-nm-2'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=full;});
+  ['pp-dob','fp-dob'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=dob;});
+  const tn=document.getElementById('tax-name');if(tn)tn.innerHTML=full;
+  const td=document.getElementById('tax-dob');if(td)td.textContent=dob;
+  const gr=document.getElementById('greeting');if(gr)gr.textContent=`Привіт, ${first} 👋`;
+  document.getElementById('inp-last').value=last;document.getElementById('inp-first').value=first;
+  document.getElementById('inp-mid').value=mid;document.getElementById('inp-dob').value=dob;
+}
+try{
+  const l=localStorage.getItem('dl'),f=localStorage.getItem('df'),m=localStorage.getItem('dm'),d=localStorage.getItem('dd');
+  if(l||f)applyProfile(l||'Трофименко',f||'Кирило',m||'Євгенійович',d||'07.03.2009');
+}catch(e){}
+
+function copyTax(){
+  navigator.clipboard?.writeText('3987804511').catch(()=>{});
+  const b=document.getElementById('cpbtn');b.textContent='✅';setTimeout(()=>b.textContent='⧉',1500);
+}
+
+updateCarousel(false);
+</script>
+</body>
+</html>

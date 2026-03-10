@@ -2,11 +2,11 @@
 <html lang="uk">
 <head>
   <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#000000">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Дія</title>
-<style>
+  <meta name="theme-color" content="#000000">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>Дія</title>
+  <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{--card:rgba(255,255,255,0.84);--r:18px;--nav:72px;}
 body{font-family:'Helvetica Neue',Arial,sans-serif;overflow:hidden;user-select:none;background:#1a1a2e;}
@@ -118,9 +118,25 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;overflow:hidden;user-select:n
   display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
 
 /* ══ DOCS ══ */
-.docs-hdr{font-size:28px;font-weight:700;padding:12px 18px 14px;}
-.doc-track-outer{overflow:hidden;position:relative;height:500px;padding:0;}
-.doc-track{display:flex;gap:14px;position:absolute;top:0;left:22px;will-change:transform;}
+.docs-hdr{
+  font-size:28px;
+  font-weight:700;
+  padding:26px 18px 18px;
+}
+.doc-track-outer{
+  overflow:hidden;
+  position:relative;
+  height:520px;
+  padding:0;
+}
+.doc-track{
+  display:flex;
+  gap:14px;
+  position:absolute;
+  top:18px;
+  left:22px;
+  will-change:transform;
+}
 
 .doc-slot{
   width:346px;height:492px;flex-shrink:0;perspective:1200px;position:relative;
@@ -201,7 +217,13 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;overflow:hidden;user-select:n
 .qr-note{font-size:11px;color:#aaa;text-align:center;}
 .qr-nm{font-size:15px;font-weight:700;text-align:center;line-height:1.3;color:#111;}
 
-.doc-dots{display:flex;justify-content:center;gap:6px;margin:10px 0 8px;align-items:center;}
+.doc-dots{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin:22px 0 8px;
+  align-items:center;
+}
 .doc-dots .dot{transition:width .3s ease,background .3s ease;}
 
 .doc-add-inner{
@@ -285,7 +307,7 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;overflow:hidden;user-select:n
 .sig-btn{flex:1;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;}
 .sig-btn-clear{background:#f2f2f2;color:#333;}
 .sig-btn-save{background:#111;color:#fff;}
-</style>
+  </style>
 </head>
 <body>
 <div class="shell"><div class="phone">
@@ -578,7 +600,6 @@ body{font-family:'Helvetica Neue',Arial,sans-serif;overflow:hidden;user-select:n
 </div></div>
 
 <script>
-/* ──── SVG ICONS FOR SERVICES (monochrome) ──── */
 const SVC_ICONS={
 shield:`<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>`,
 bolt:`<svg viewBox="0 0 24 24" fill="white"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
@@ -620,7 +641,6 @@ const SVC_LIST=[
   });
 })();
 
-/* ──── MARQUEE (seamless) ──── */
 function getBarText(){
   const n=new Date(),d=String(n.getDate()).padStart(2,'0'),m=String(n.getMonth()+1).padStart(2,'0'),y=n.getFullYear();
   const today=`${d}.${m}.${y}`;
@@ -633,13 +653,11 @@ function getBarText(){
 function refreshBars(){const t=getBarText();['vbar0','vbar1','vbar2'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML=t;});}
 refreshBars();setInterval(refreshBars,30000);
 
-/* ──── PIN ──── */
 let pv='';
 function pp(n){if(pv.length>=4)return;pv+=n;upd();if(pv.length===4){setTimeout(()=>{navTo('s-home',document.querySelector('#s-home .ni'));pv='';upd();},300);}}
 function pd(){pv=pv.slice(0,-1);upd();}
 function upd(){for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('on',i<pv.length);}
 
-/* ──── NAVIGATION ──── */
 function goTo(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function navTo(id,el){
   goTo(id);
@@ -653,7 +671,6 @@ function navTo(id,el){
   });
 }
 
-/* ──── CAROUSEL ──── */
 const CARD_W=346,GAP=14,NUM_CARDS=3;
 let curCard=0;
 const flipped=[false,false,false],timers=[null,null,null],secs=[180,180,180];
@@ -681,7 +698,6 @@ outer.addEventListener('touchstart',e=>{tx0=e.touches[0].clientX;swiping=true;},
 outer.addEventListener('touchmove',e=>{
   if(!swiping)return;
   const dx=e.touches[0].clientX-tx0;
-  const dy=e.touches[0].clientY-(e.touches[0].clientY);
   if(Math.abs(dx)>8)e.preventDefault();
 },{passive:false});
 outer.addEventListener('touchend',e=>{
@@ -694,16 +710,14 @@ outer.addEventListener('touchend',e=>{
   updateCarousel(true);
 });
 
-/* ──── QR (realistic, hi-res canvas) ──── */
 function drawQR(id){
   const c=document.getElementById(id);if(!c)return;
   const ctx=c.getContext('2d');
-  const s=c.width; // 480
+  const s=c.width;
   const cells=37;
   const ms=s/cells;
-  
-  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,s,s);
 
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,s,s);
   const g=[];
   for(let i=0;i<cells;i++){g[i]=[];for(let j=0;j<cells;j++)g[i][j]=false;}
 
@@ -716,26 +730,20 @@ function drawQR(id){
   }
   finder(0,0);finder(cells-7,0);finder(0,cells-7);
 
-  // Alignment at (30,30)
   for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
     const edge=Math.abs(dx)===2||Math.abs(dy)===2;
     const center=dx===0&&dy===0;
     if(edge||center)g[30+dy][30+dx]=true;
   }
 
-  // Timing
   for(let i=8;i<cells-8;i++){g[6][i]=i%2===0;g[i][6]=i%2===0;}
-
-  // Dark module
   g[cells-8][8]=true;
 
-  // Format info strips (visual, simplified)
   const fmtBits=[1,0,1,1,0,0,1,0,0,1,1,0,1,0,1];
   for(let i=0;i<8;i++){
     if(i<fmtBits.length){g[8][i===6?7:i]=!!fmtBits[i];g[i===6?7:i][8]=!!fmtBits[i];}
   }
 
-  // Pseudo-random data
   const ci=parseInt(id.replace(/\D/g,''))||0;
   const sd=Date.now()+ci*77773;
 
@@ -745,50 +753,41 @@ function drawQR(id){
     const inTiming=(x===6||y===6);
     const inDark=(x===8&&y===cells-8);
     const inFmt=(y===8&&x<=8)||(x===8&&y<=8)||(y===8&&x>=cells-8)||(x===8&&y>=cells-8);
-
     if(inFinder||inAlign||inTiming||inDark||inFmt)continue;
-    
     const h=((x*2654435761+y*2246822519+sd*16777619)>>>0);
     g[y][x]=(h%100)<46;
   }
 
-  // Render with slight rounding for polished look
   ctx.fillStyle='#1a1a1a';
   const r=ms*0.12;
   for(let y=0;y<cells;y++)for(let x=0;x<cells;x++){
     if(!g[y][x])continue;
     const px=x*ms,py=y*ms;
-    // Check neighbors - if surrounded, draw square; else round
     const hasTop=y>0&&g[y-1][x];
     const hasBot=y<cells-1&&g[y+1][x];
     const hasLeft=x>0&&g[y][x-1];
     const hasRight=x<cells-1&&g[y][x+1];
-    
+
     const rtl=(!hasTop&&!hasLeft)?r:0;
     const rtr=(!hasTop&&!hasRight)?r:0;
     const rbr=(!hasBot&&!hasRight)?r:0;
     const rbl=(!hasBot&&!hasLeft)?r:0;
-    
+
     ctx.beginPath();
     ctx.moveTo(px+rtl,py);
     ctx.lineTo(px+ms-rtr,py);
-    if(rtr)ctx.quadraticCurveTo(px+ms,py,px+ms,py+rtr);
-    else ctx.lineTo(px+ms,py);
+    if(rtr)ctx.quadraticCurveTo(px+ms,py,px+ms,py+rtr); else ctx.lineTo(px+ms,py);
     ctx.lineTo(px+ms,py+ms-rbr);
-    if(rbr)ctx.quadraticCurveTo(px+ms,py+ms,px+ms-rbr,py+ms);
-    else ctx.lineTo(px+ms,py+ms);
+    if(rbr)ctx.quadraticCurveTo(px+ms,py+ms,px+ms-rbr,py+ms); else ctx.lineTo(px+ms,py+ms);
     ctx.lineTo(px+rbl,py+ms);
-    if(rbl)ctx.quadraticCurveTo(px,py+ms,px,py+ms-rbl);
-    else ctx.lineTo(px,py+ms);
+    if(rbl)ctx.quadraticCurveTo(px,py+ms,px,py+ms-rbl); else ctx.lineTo(px,py+ms);
     ctx.lineTo(px,py+rtl);
-    if(rtl)ctx.quadraticCurveTo(px,py,px+rtl,py);
-    else ctx.lineTo(px,py);
+    if(rtl)ctx.quadraticCurveTo(px,py,px+rtl,py); else ctx.lineTo(px,py);
     ctx.closePath();
     ctx.fill();
   }
 }
 
-/* ──── FLIP ──── */
 function flipCard(idx){
   const f=document.getElementById('flip-'+idx);
   flipped[idx]=!flipped[idx];
@@ -807,7 +806,6 @@ function startTimer(idx){
 }
 function stopTimer(idx){if(timers[idx]){clearInterval(timers[idx]);timers[idx]=null;}}
 
-/* ──── PHOTOS ──── */
 function applyPhoto(dataUrl,idx){
   if(!dataUrl)return;
   const imgEl=document.getElementById('spi'+idx);
@@ -824,7 +822,6 @@ function handlePhoto(e,idx){
 }
 try{['dp0','dp1'].forEach((k,i)=>{const v=localStorage.getItem(k);if(v)applyPhoto(v,i);});}catch(e){}
 
-/* ──── SIGNATURE PAD ──── */
 let sigDrawing=false,sigLastX=0,sigLastY=0;
 const sigCanvas=document.getElementById('sigCanvas');
 const sigCtx=sigCanvas.getContext('2d');
@@ -864,7 +861,6 @@ function applySig(dataUrl){
 }
 try{const s=localStorage.getItem('diia_sig_img');if(s)applySig(s);}catch(e){}
 
-/* ──── SAVE SETTINGS ──── */
 function saveSettings(){
   const last=document.getElementById('inp-last').value.trim();
   const first=document.getElementById('inp-first').value.trim();
@@ -900,6 +896,4 @@ function copyTax(){
 updateCarousel(false);
 </script>
 </body>
-
 </html>
-
